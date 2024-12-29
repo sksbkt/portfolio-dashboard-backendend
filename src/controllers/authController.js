@@ -1,10 +1,42 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { USER_REGEX, PWD_REGEX, ROLES } = require("../utils/validations");
 
-const register = async (req, res) => {
+const registerController = async (req, res) => {
   try {
     const { username, password, role } = req.body;
+    if (!username || !password || !role) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+    // Validate username
+    if (!USER_REGEX.test(username)) {
+      return res.status(400).json({
+        message:
+          "Username must start with a letter and can contain letters, numbers, hyphens, or underscores. Length should be 4-24 characters.",
+      });
+    }
+
+    // Validate password
+    if (!PWD_REGEX.test(password)) {
+      return res.status(400).json({
+        message:
+          "Password must be 8-24 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character (!@#$%).",
+      });
+    }
+
+    // Validate role
+    if (!ROLES.includes(role)) {
+      return res.status(400).json({
+        message: "Role is not valid",
+      });
+    }
+
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.status(409).json({ message: "User already exists" });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({
       username,
@@ -21,7 +53,7 @@ const register = async (req, res) => {
   }
 };
 
-const login = async (req, res) => {
+const loginController = async (req, res) => {
   try {
     const { username, password, role } = req.body;
     const user = await User.findOne({ username });
@@ -45,6 +77,6 @@ const login = async (req, res) => {
 };
 
 module.exports = {
-  register,
-  login,
+  registerController,
+  loginController,
 };
