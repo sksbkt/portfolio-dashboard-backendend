@@ -56,13 +56,16 @@ const registerController = async (req, res) => {
 const loginController = async (req, res) => {
   try {
     const { username, password, role } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
     const user = await User.findOne({ username });
     if (!user) {
       return res.status(404).json({ message: `User ${username} not found!` });
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
     const token = jwt.sign(
       { id: user._id, role: user.role },
