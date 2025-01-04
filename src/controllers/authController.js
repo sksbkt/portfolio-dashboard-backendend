@@ -5,8 +5,8 @@ const { USER_REGEX, PWD_REGEX, ROLES } = require("../utils/validations");
 
 const registerController = async (req, res) => {
   try {
-    const { username, password, role } = req.body;
-    if (!username || !password || !role) {
+    const { username, password, roles } = req.body;
+    if (!username || !password || !roles) {
       return res.status(400).json({ message: "All fields are required" });
     }
     // Validate username
@@ -26,10 +26,13 @@ const registerController = async (req, res) => {
     }
 
     // Validate role
-    if (!ROLES.includes(role)) {
-      return res.status(400).json({
-        message: "Role is not valid",
-      });
+
+    if (
+      !Array.isArray(roles) ||
+      roles.length === 0 ||
+      !roles.every((role) => ROLES.includes(role))
+    ) {
+      return res.status(401).json({ message: "Invalid roles" });
     }
 
     const existingUser = await User.findOne({ username });
@@ -41,8 +44,9 @@ const registerController = async (req, res) => {
     const user = new User({
       username,
       password: hashedPassword,
-      role,
+      roles: [...roles],
     });
+
     await user.save();
     res
       .status(201)
@@ -55,7 +59,7 @@ const registerController = async (req, res) => {
 
 const loginController = async (req, res) => {
   try {
-    const { username, password, role } = req.body;
+    const { username, password, roles } = req.body;
     if (!username || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
@@ -68,7 +72,7 @@ const loginController = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      { id: user._id, roles: user.roles },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
