@@ -1,7 +1,6 @@
-const User = require("../models/userModel");
+const User = require("../../models/userModel");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const { USER_REGEX, PWD_REGEX, ROLES } = require("../utils/validations");
+const { USER_REGEX, PWD_REGEX, ROLES } = require("../../utils/validations");
 
 const registerController = async (req, res) => {
   try {
@@ -57,33 +56,4 @@ const registerController = async (req, res) => {
   }
 };
 
-const loginController = async (req, res) => {
-  try {
-    const { username, password, roles } = req.body;
-    if (!username || !password) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
-    const user = await User.findOne({ username });
-    if (!user) {
-      return res.status(404).json({ message: `User ${username} not found!` });
-    }
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
-    const token = jwt.sign(
-      { id: user._id, roles: user.roles },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
-    res.status(200).json({ token });
-  } catch (error) {
-    console.log(error.message);
-    res.status(500).json({ message: "Something went wrong" });
-  }
-};
-
-module.exports = {
-  registerController,
-  loginController,
-};
+module.exports = { registerController };

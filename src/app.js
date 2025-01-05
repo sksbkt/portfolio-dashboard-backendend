@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv").config();
 const dbConnect = require("./config/dbConnect.js");
+const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/authRoutes.js");
 const userRoutes = require("./routes/userRoutes.js");
 const contactRoutes = require("./routes/contactRoutes.js");
@@ -13,6 +14,7 @@ const app = express();
 
 // ? middleware
 
+app.use(cookieParser());
 app.use(express.json({ limit: "25mb" }));
 app.use(express.urlencoded({ limit: "25mb", extended: true }));
 app.use(
