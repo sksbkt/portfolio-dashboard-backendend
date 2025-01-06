@@ -20,7 +20,7 @@ const loginController = async (req, res) => {
     const accessToken = jwt.sign(
       { id: foundUser._id, roles: foundUser.roles },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "10s" }
     );
 
     const refreshToken = jwt.sign(
