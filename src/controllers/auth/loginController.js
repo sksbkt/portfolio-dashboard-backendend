@@ -4,7 +4,11 @@ const jwt = require("jsonwebtoken");
 
 const loginController = async (req, res) => {
   try {
-    const { username, password, roles } = req.body;
+    const {
+      username,
+      password,
+      // roles
+    } = req.body;
     if (!username || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
@@ -37,7 +41,10 @@ const loginController = async (req, res) => {
       secure: true,
       sameSite: "none",
     });
-    res.status(200).json({ roles, accessToken });
+    res.status(200).json({
+      // roles,
+      accessToken,
+    });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ message: "Something went wrong" });
